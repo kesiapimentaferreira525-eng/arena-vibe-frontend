@@ -12,7 +12,8 @@
             min-height: 100vh; padding: 42px clamp(18px, 5vw, 72px); color: var(--ink);
             font-family: 'DM Sans', sans-serif;
             background: radial-gradient(circle at 15% 10%, #164563 0, transparent 32%),
-                radial-gradient(circle at 90% 90%, #7b4d2b 0, transparent 34%), var(--navy);
+                radial-gradient(circle at 90% 90%, #7b4d2b 0, transparent 34%),
+                linear-gradient(145deg, #071525 0%, #0a2133 55%, #5d3d25 100%);
             position: relative; overflow-x: hidden;
         }
         body::before {
@@ -24,8 +25,19 @@
             background: repeating-linear-gradient(8deg, rgba(255,255,255,.07) 0 2px, transparent 2px 18px);
             opacity: .45; pointer-events: none;
         }
-        h1 { position: relative; z-index: 1; text-align: center; text-transform: uppercase; font: 700 clamp(2rem, 5vw, 4.4rem)/1 'Space Grotesk', sans-serif; color: var(--sand-light); letter-spacing: .06em; text-shadow: 0 5px 24px rgba(0,0,0,.35); margin-bottom: 42px; }
+        .quadra-cenografica { position: fixed; inset: 0; overflow: hidden; pointer-events: none; opacity: .5; }
+        .quadra-cenografica::before {
+            content: ''; position: absolute; width: 120vw; height: 54vh; left: -10vw; bottom: -18vh;
+            border: 3px solid rgba(255,236,194,.28); border-radius: 50% 50% 0 0;
+            box-shadow: 0 -24px 0 rgba(255,236,194,.13), 0 -48px 0 rgba(255,236,194,.08);
+            transform: perspective(500px) rotateX(48deg);
+        }
+        .rede { position: absolute; left: 0; right: 0; bottom: 30vh; height: 3px; background: rgba(255,255,255,.42); box-shadow: 0 0 0 2px rgba(3,13,25,.35); }
+        .rede::after { content: ''; position: absolute; inset: -22px 0; background: repeating-linear-gradient(90deg, transparent 0 26px, rgba(255,255,255,.13) 27px 28px), repeating-linear-gradient(0deg, transparent 0 10px, rgba(255,255,255,.13) 11px 12px); opacity: .7; }
+        .bola { position: absolute; right: 9vw; top: 17vh; width: 72px; height: 72px; display: grid; place-items: center; border-radius: 50%; background: #fff7e8; box-shadow: 0 18px 30px rgba(0,0,0,.35); font-size: 39px; transform: rotate(18deg); animation: flutuar 4s ease-in-out infinite; }
+        h1 { position: relative; z-index: 1; text-align: center; text-transform: uppercase; font: 700 clamp(2rem, 5vw, 4.4rem)/1 'Space Grotesk', sans-serif; color: var(--sand-light); letter-spacing: .06em; text-shadow: 0 5px 24px rgba(0,0,0,.35); margin-bottom: 10px; }
         h1::after { content: ''; display: block; width: 92px; height: 5px; margin: 18px auto 0; border-radius: 10px; background: linear-gradient(90deg, var(--blue), var(--sand)); }
+        .subtitulo { position: relative; z-index: 1; text-align: center; color: #b9d6df; letter-spacing: .18em; text-transform: uppercase; font-size: .72rem; margin-bottom: 42px; }
         .grid-quadras { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; max-width: 1500px; margin: 0 auto; }
         .card-quadra { background: linear-gradient(145deg, rgba(30, 57, 78, .94), rgba(12, 28, 46, .96)); border: 1px solid rgba(255,255,255,.1); border-radius: 24px; padding: 26px; box-shadow: 0 24px 50px rgba(0,0,0,.28); border-top: 5px solid #8797a5; transition: transform .25s ease, box-shadow .25s ease; }
         .card-quadra:hover { transform: translateY(-6px); box-shadow: 0 28px 60px rgba(0,0,0,.4); }
@@ -44,12 +56,15 @@
         .proxima { font-size: .9rem; color: #a9bac7; border-top: 1px solid rgba(255,255,255,.12); padding-top: 14px; margin-top: 14px; }
         .alerta-tempo { max-width: 1500px; margin: -20px auto 28px; padding: 14px 18px; border: 1px solid rgba(255,207,92,.55); border-radius: 14px; color: #ffe39a; background: rgba(132,91,15,.28); font-weight: 700; text-align: center; }
         @keyframes alerta-tempo { from { opacity: 1; box-shadow: 0 0 0 rgba(255,207,92,0); } to { opacity: .55; box-shadow: 0 0 32px rgba(255,207,92,.55); } }
+        @keyframes flutuar { 0%, 100% { transform: translateY(0) rotate(18deg); } 50% { transform: translateY(-18px) rotate(30deg); } }
         @keyframes pulsar { from { opacity: 1; } to { opacity: .84; } }
     </style>
 </head>
 <body>
+    <div class="quadra-cenografica" aria-hidden="true"><div class="rede"></div><div class="bola">🏐</div></div>
 
     <h1>Arena Vibe Sports - Status das Quadras</h1>
+    <div class="subtitulo">Quadra, areia e energia em movimento</div>
     <div class="alerta-tempo" id="alerta-tempo" role="alert" hidden></div>
     <div class="grid-quadras" id="painel-container"></div>
 
