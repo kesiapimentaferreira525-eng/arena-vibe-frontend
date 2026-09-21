@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Arena Vibe Sports</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+        :root { --navy: #071525; --blue: #087ea4; --sand: #d89b50; --sand-light: #fff3df; --line: #e7d4b8; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { min-height: 100vh; color: #203047; padding: 32px clamp(16px, 4vw, 58px); font-family: 'DM Sans', sans-serif; background: radial-gradient(circle at 8% 0, #dff6f8 0, transparent 32%), linear-gradient(135deg, #fffaf2, #f4eadb); }
+        body::before { content: '🏐'; position: fixed; right: 4vw; bottom: 3vh; font-size: 140px; opacity: .08; transform: rotate(-15deg); pointer-events: none; }
+        h1 { color: var(--navy); text-align: center; font: 700 clamp(2rem, 4vw, 3.4rem)/1 'Space Grotesk', sans-serif; margin-bottom: 8px; letter-spacing: -.03em; }
+        h1::after { content: ''; display: block; width: 76px; height: 4px; margin: 15px auto 0; border-radius: 8px; background: linear-gradient(90deg, var(--blue), var(--sand)); }
+        .sub { text-align: center; color: #65758a; margin: 17px auto 32px; font-size: .96rem; }
+
+        section { max-width: 1280px; margin: 0 auto 28px; }
+        section > h2 { font: 700 1.2rem 'Space Grotesk', sans-serif; color: var(--navy); margin-bottom: 14px; border-left: 5px solid var(--sand); padding-left: 12px; }
+
+        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+        .card { background: rgba(255,255,255,.86); border: 1px solid rgba(216,155,80,.2); border-radius: 18px; padding: 22px; box-shadow: 0 16px 32px rgba(102,73,35,.1); border-top: 5px solid #3b82f6; }
+        .card.livre { border-top-color: #22c55e; }
+        .card.ocupada { border-top-color: #3b82f6; }
+        .card.hora-extra { border-top-color: #ef4444; }
+        .card.tempo-encerrado { border-top-color: #d89b50; animation: alerta-tempo .75s infinite alternate; }
+        .card h3 { margin-bottom: 10px; font-size: 1.3rem; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+
+        .badge { font-size: .72rem; padding: 3px 9px; border-radius: 20px; text-transform: uppercase; font-weight: 700; white-space: nowrap; }
+        .badge.livre { background: #dcfce7; color: #166534; }
+        .badge.ocupada { background: #dbeafe; color: #1e40af; }
+        .badge.hora-extra { background: #fee2e2; color: #991b1b; }
+        .badge.tempo-encerrado { background: #fff0c7; color: #8a5b00; }
+        .badge.pago { background: #dcfce7; color: #166534; }
+        .badge.pendente { background: #fef9c3; color: #854d0e; }
+        .badge.cancelado { background: #e2e8f0; color: #475569; }
+
+        .form-group { margin-bottom: 10px; }
+        label { display: block; font-size: .8rem; font-weight: 700; margin-bottom: 4px; color: #475569; }
+        input, select { width: 100%; padding: 10px 12px; border: 1px solid #d8c8b1; border-radius: 9px; font: inherit; font-size: .95rem; background: #fffdf9; outline: none; transition: border .2s, box-shadow .2s; }
+        input:focus, select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(8,126,164,.13); }
+        .linha { display: flex; gap: 10px; flex-wrap: wrap; }
+        .linha > * { flex: 1; min-width: 180px; }
+
+        button { width: 100%; padding: 11px; border: none; border-radius: 9px; font: 700 .95rem 'DM Sans', sans-serif; cursor: pointer; margin-top: 6px; transition: transform .2s, filter .2s; }
+        .btn-iniciar { background: #22c55e; color: #fff; }
+        .btn-liberar { background: #ef4444; color: #fff; }
+        .btn-cancelar { background: #f59e0b; color: #fff; }
+        .btn-pagar { background: #0ea5e9; color: #fff; }
+        .btn-secundario { background: #e2e8f0; color: #1e293b; }
+        button:hover { filter: brightness(.94); transform: translateY(-1px); }
+
+        .status-info { margin: 10px 0; font-size: .92rem; background: #f8fafc; padding: 10px; border-radius: 6px; line-height: 1.6; }
+        .cronometro { font-size: 1.7rem; font-weight: 700; text-align: center; margin: 10px 0; padding: 10px; border-radius: 8px; background: #0f172a; color: #60a5fa; }
+        .cronometro.extra { color: #fca5a5; }
+        .alerta-extra { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 10px; border-radius: 6px; font-size: .88rem; margin: 8px 0; line-height: 1.6; }
+
+        table { width: 100%; border-collapse: collapse; background: rgba(255,255,255,.9); border-radius: 16px; overflow: hidden; box-shadow: 0 14px 28px rgba(102,73,35,.09); }
+        th, td { padding: 10px 12px; text-align: left; font-size: .9rem; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+        th { background: #f7ecdc; font-size: .78rem; text-transform: uppercase; color: #475569; }
+        tr:last-child td { border-bottom: none; }
+        td.acoes { white-space: nowrap; width: 1%; }
+        td.acoes button { width: auto; padding: 6px 10px; font-size: .8rem; margin: 0 2px; }
+        .vazio { padding: 16px; color: #64748b; font-size: .9rem; background: #fff; border-radius: 12px; }
+
+        .filtros { background: rgba(255,255,255,.78); border: 1px solid rgba(216,155,80,.2); border-radius: 16px; padding: 18px; box-shadow: 0 12px 25px rgba(102,73,35,.08); display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; align-items: end; margin-bottom: 14px; }
+        .resumo { display: flex; gap: 14px; margin-bottom: 12px; flex-wrap: wrap; }
+        .resumo > div { background: #fff; border-radius: 12px; padding: 12px 18px; box-shadow: 0 4px 6px rgba(0,0,0,.08); }
+        .resumo span { display: block; font-size: .75rem; text-transform: uppercase; color: #64748b; font-weight: 700; }
+        .resumo strong { font-size: 1.3rem; }
+        .erro { max-width: 1280px; margin: 0 auto 16px; background: #fee2e2; color: #991b1b; padding: 10px 14px; border-radius: 8px; display: none; font-size: .88rem; }
+        .alerta-tempo { max-width: 1280px; margin: 0 auto 18px; padding: 14px 18px; border: 1px solid #e4b65d; border-radius: 12px; background: #fff4d8; color: #8a5b00; font-weight: 700; text-align: center; }
+        @keyframes alerta-tempo { from { opacity: 1; box-shadow: 0 0 0 rgba(216,155,80,0); } to { opacity: .55; box-shadow: 0 0 28px rgba(216,155,80,.5); } }
+    </style>
+</head>
+<body>
+
+    <h1>Painel Administrativo da Arena</h1>
+    <div class="sub">Quem reservou · cancelamentos · pagamentos · taxa de hora extra · agendamentos futuros · datas disponíveis</div>
+
+    <div class="erro" id="erro"></div>
+    <div class="alerta-tempo" id="alerta-tempo" role="alert" hidden></div>
+
+    <section>
+        <h2>Quadras em tempo real</h2>
+        <div class="admin-grid" id="admin-container"></div>
+    </section>
+
+    <section>
+        <h2>Agendamentos futuros</h2>
+        <div class="filtros">
+            <div>
+                <label>Quadra</label>
+                <select id="ag-quadra"></select>
+            </div>
+            <div>
+                <label>Quem fará a reserva</label>
+                <input type="text" id="ag-cliente" placeholder="Nome do cliente responsável">
+            </div>
+            <div>
+                <label>Data e hora de início</label>
+                <input type="datetime-local" id="ag-inicio">
+            </div>
+            <div>
+                <label>Duração (minutos)</label>
+                <input type="number" id="ag-duracao" value="60" step="15" min="15">
+            </div>
+            <div>
+                <button class="btn-iniciar" onclick="criarAgendamento()">Agendar</button>
+            </div>
+        </div>
+        <div id="futuros-container"></div>
+    </section>
+
+    <section>
+        <h2>Datas disponíveis para locação</h2>
+        <div class="filtros">
+            <div>
+                <label>Quadra</label>
+                <select id="disp-quadra" onchange="carregarDisponibilidade()"></select>
+            </div>
+            <div>
+                <label>De</label>
+                <input type="date" id="disp-inicio" onchange="carregarDisponibilidade()">
+            </div>
+            <div>
+                <label>Até</label>
+                <input type="date" id="disp-fim" onchange="carregarDisponibilidade()">
+            </div>
+            <div>
+                <button class="btn-secundario" onclick="carregarDisponibilidade()">Consultar</button>
+            </div>
+        </div>
+        <div id="datas-container"></div>
+    </section>
+
+    <section>
+        <h2>Pagamentos</h2>
+        <div id="pagamentos-container"></div>
+    </section>
+
+    <section>
+        <h2>Cancelamentos</h2>
+        <div id="cancelamentos-container"></div>
+    </section>
+
+    <script src="config.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>

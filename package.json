@@ -1,0 +1,11 @@
+{
+  "name": "arena-vibe-frontend",
+  "version": "1.0.0",
+  "description": "Telão e painel administrativo da Arena Vibe Sports (HTML5, CSS3 e JavaScript puro) consumindo a API Spring Boot.",
+  "private": true,
+  "scripts": {
+    "start": "npx --yes serve . -l 5500"
+  },
+  "keywords": ["arena", "volei", "painel", "reservas"],
+  "license": "MIT"
+}

@@ -1,0 +1,6 @@
+{
+  "javascript.validate.enable": true,
+  "html.validate.scripts": true,
+  "files.eol": "\n",
+  "editor.tabSize": 2
+}

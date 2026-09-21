@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel - Arena Vibe Sports</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+        :root { --navy: #071525; --blue: #19b5d8; --sand: #f2c078; --sand-light: #ffe4b5; --ink: #f8fbff; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh; padding: 42px clamp(18px, 5vw, 72px); color: var(--ink);
+            font-family: 'DM Sans', sans-serif;
+            background: radial-gradient(circle at 15% 10%, #164563 0, transparent 32%),
+                radial-gradient(circle at 90% 90%, #7b4d2b 0, transparent 34%), var(--navy);
+            position: relative; overflow-x: hidden;
+        }
+        body::before {
+            content: '🏐'; position: fixed; right: 5vw; top: 5vh; opacity: .12;
+            font-size: clamp(90px, 16vw, 220px); transform: rotate(18deg); pointer-events: none;
+        }
+        body::after {
+            content: ''; position: fixed; left: -5%; right: -5%; bottom: -90px; height: 190px;
+            background: repeating-linear-gradient(8deg, rgba(255,255,255,.07) 0 2px, transparent 2px 18px);
+            opacity: .45; pointer-events: none;
+        }
+        h1 { position: relative; z-index: 1; text-align: center; text-transform: uppercase; font: 700 clamp(2rem, 5vw, 4.4rem)/1 'Space Grotesk', sans-serif; color: var(--sand-light); letter-spacing: .06em; text-shadow: 0 5px 24px rgba(0,0,0,.35); margin-bottom: 42px; }
+        h1::after { content: ''; display: block; width: 92px; height: 5px; margin: 18px auto 0; border-radius: 10px; background: linear-gradient(90deg, var(--blue), var(--sand)); }
+        .grid-quadras { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; max-width: 1500px; margin: 0 auto; }
+        .card-quadra { background: linear-gradient(145deg, rgba(30, 57, 78, .94), rgba(12, 28, 46, .96)); border: 1px solid rgba(255,255,255,.1); border-radius: 24px; padding: 26px; box-shadow: 0 24px 50px rgba(0,0,0,.28); border-top: 5px solid #8797a5; transition: transform .25s ease, box-shadow .25s ease; }
+        .card-quadra:hover { transform: translateY(-6px); box-shadow: 0 28px 60px rgba(0,0,0,.4); }
+        .card-quadra.livre { border-top-color: #53d88a; }
+        .card-quadra.ocupada { border-top-color: var(--blue); }
+        .card-quadra.hora-extra { border-top-color: #ff765f; background: linear-gradient(145deg, #512617, #27151a); animation: pulsar 1.5s infinite alternate; }
+        .card-quadra.tempo-encerrado { border-top-color: #ffcf5c; background: linear-gradient(145deg, #59451d, #2d2414); animation: alerta-tempo .75s infinite alternate; }
+        .nome-quadra { font: 700 1.55rem 'Space Grotesk', sans-serif; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .badge { font-size: .72rem; font-weight: 700; padding: 6px 11px; border-radius: 999px; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+        .badge.livre { background: rgba(45, 190, 112, .18); color: #7ff0a8; }
+        .badge.ocupada { background: rgba(25, 181, 216, .18); color: #76e5fa; }
+        .badge.hora-extra { background: rgba(255, 99, 77, .2); color: #ffb1a4; }
+        .badge.tempo-encerrado { background: rgba(255, 207, 92, .2); color: #ffe39a; }
+        .info { font-size: 1rem; margin: 11px 0; color: #c9d8e4; }
+        .cronometro { font: 700 clamp(2rem, 5vw, 3rem) 'Space Grotesk', sans-serif; text-align: center; margin: 22px 0; background: rgba(3, 13, 25, .7); padding: 18px 12px; border-radius: 16px; letter-spacing: .06em; border: 1px solid rgba(255,255,255,.07); }
+        .proxima { font-size: .9rem; color: #a9bac7; border-top: 1px solid rgba(255,255,255,.12); padding-top: 14px; margin-top: 14px; }
+        .alerta-tempo { max-width: 1500px; margin: -20px auto 28px; padding: 14px 18px; border: 1px solid rgba(255,207,92,.55); border-radius: 14px; color: #ffe39a; background: rgba(132,91,15,.28); font-weight: 700; text-align: center; }
+        @keyframes alerta-tempo { from { opacity: 1; box-shadow: 0 0 0 rgba(255,207,92,0); } to { opacity: .55; box-shadow: 0 0 32px rgba(255,207,92,.55); } }
+        @keyframes pulsar { from { opacity: 1; } to { opacity: .84; } }
+    </style>
+</head>
+<body>
+
+    <h1>Arena Vibe Sports - Status das Quadras</h1>
+    <div class="alerta-tempo" id="alerta-tempo" role="alert" hidden></div>
+    <div class="grid-quadras" id="painel-container"></div>
+
+    <script src="config.js"></script>
+    <script>
+        const TEMPOS_ANTERIORES = new Map();
+        const ALERTAS_EMITIDOS = new Set();
+
+        function atualizarAlertaTempo(quadras) {
+            const encerradas = quadras.filter((q) =>
+                q.status === 'OCUPADA' && !q.horaExtraAtiva && Number(q.segundosRestantes || 0) <= 0);
+            const alerta = document.getElementById('alerta-tempo');
+            alerta.hidden = !encerradas.length;
+            alerta.textContent = encerradas.length
+                ? `⚠️ Tempo encerrado: ${encerradas.map((q) => q.nome).join(', ')}. Libere a quadra para encerrar a partida.`
+                : '';
+
+            quadras.forEach((q) => {
+                const atual = Number(q.segundosRestantes || 0);
+                const anterior = TEMPOS_ANTERIORES.get(q.id);
+                if (anterior > 0 && atual <= 0 && !ALERTAS_EMITIDOS.has(q.id)) {
+                    ALERTAS_EMITIDOS.add(q.id);
+                    window.alert(`⚠️ O tempo da ${q.nome} acabou.`);
+                }
+                if (atual > 0) ALERTAS_EMITIDOS.delete(q.id);
+                TEMPOS_ANTERIORES.set(q.id, atual);
+            });
+        }
+
+        async function carregarPainel() {
+            try {
+                const quadras = await Api.get(ENDPOINTS.painel());
+                atualizarAlertaTempo(quadras);
+                const container = document.getElementById('painel-container');
+                container.innerHTML = quadras.map((q) => {
+                    let classeStatus = 'livre', textoBadge = 'Livre', cronometro = 'DISPONÍVEL', cor = '#4ade80';
+                    if (q.horaExtraAtiva || q.status === 'HORA_EXTRA') {
+                        classeStatus = 'hora-extra'; textoBadge = '⚠️ Hora Extra';
+                        cronometro = '+ ' + formatarTempo(q.segundosUltrapassados); cor = '#fca5a5';
+                    } else if (q.status === 'OCUPADA' && Number(q.segundosRestantes || 0) <= 0) {
+                        classeStatus = 'tempo-encerrado'; textoBadge = '⚠️ Tempo encerrado';
+                        cronometro = 'TEMPO ENCERRADO'; cor = '#ffe39a';
+                    } else if (q.status === 'OCUPADA') {
+                        classeStatus = 'ocupada'; textoBadge = 'Em Jogo';
+                        cronometro = formatarTempo(q.segundosRestantes); cor = '#60a5fa';
+                    }
+                    const r = q.reservaAtual || {};
+                    const proxima = (q.proximasReservas || [])[0];
+                    return `
+                        <div class="card-quadra ${classeStatus}">
+                            <div class="nome-quadra">${q.nome}<span class="badge ${classeStatus}">${textoBadge}</span></div>
+                            <div class="info"><strong>Reservado por:</strong> ${r.clienteResponsavel || q.clienteResponsavel || 'Nenhum'}</div>
+                            <div class="info"><strong>Término Previsto:</strong> ${formatarHora(r.fimPrevistoReserva || q.fimPrevistoReserva)}</div>
+                            <div class="cronometro" style="color:${cor};">${cronometro}</div>
+                            ${q.horaExtraAtiva ? '<div class="info" style="text-align:center;color:#fca5a5;font-weight:bold;">⚠️ PERMANÊNCIA EM HORA EXTRA</div>' : ''}
+                            ${proxima ? `<div class="proxima">Próxima reserva: ${formatarDataHora(proxima.inicioReserva)} — ${proxima.clienteResponsavel}</div>` : ''}
+                        </div>`;
+                }).join('');
+            } catch (error) {
+                console.error('Erro de conexão com o Backend:', error);
+            }
+        }
+        setInterval(carregarPainel, 1000);
+        carregarPainel();
+    </script>
+</body>
+</html>
