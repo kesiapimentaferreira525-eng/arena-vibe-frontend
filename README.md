@@ -1,6 +1,6 @@
 # Arena Vibe Sports — Frontend (Telão + Painel Administrativo)
 
-HTML5 + CSS3 + JavaScript puro, consumindo a API Spring Boot (porta 8080).
+HTML5 + CSS3 + JavaScript puro, consumindo a API Spring Boot (porta 8081).
 
 - `index.html` — telão público (atualiza a cada 1s, mostra também a próxima reserva).
 - `admin.html` + `admin.js` — painel administrativo.
@@ -16,7 +16,7 @@ HTML5 + CSS3 + JavaScript puro, consumindo a API Spring Boot (porta 8080).
 | --- | --- |
 | Quem fez a reserva (em andamento e futuras) | `QuadraResponseDTO.reservaAtual.clienteResponsavel`, `proximasReservas` |
 | Cancelamento | `POST /api/admin/reservas/{id}/cancelar` + lista das reservas com `status = CANCELADA` (mostra `canceladaEm` e se o pagamento virou `ESTORNADO`) |
-| Pagamento | `POST /api/admin/reservas/{id}/pagamento` + tabela com recebido / a receber por `statusPagamento` |
+| Pagamento | `POST /api/admin/reservas/{id}/pagar` + tabela com recebido / a receber por `statusPagamento` |
 | Horas excedentes e taxa | `minutosExcedentes`, `taxaHoraExtra`, `valorTotal` (calculados no `QuadraService` com `app.reserva.multiplicador-hora-extra`) |
 | Agendamentos futuros | reservas `AGENDADA` com início no futuro + formulário de novo agendamento |
 | Datas disponíveis para locação | `GET /api/admin/quadras/{id}/disponibilidade?inicio=&fim=` (`DisponibilidadeDTO`) |
@@ -31,7 +31,7 @@ POST /api/admin/quadras/{id}/liberar
 GET  /api/admin/quadras/{id}/disponibilidade?inicio=YYYY-MM-DD&fim=YYYY-MM-DD
 GET  /api/admin/reservas                          (novo - ReservaController)
 POST /api/admin/reservas/{id}/cancelar            (novo - ReservaController)
-POST /api/admin/reservas/{id}/pagamento           (novo - ReservaController)
+POST /api/admin/reservas/{id}/pagar               (novo - ReservaController)
 ```
 
 `inicioReserva` é enviado como `LocalDateTime` sem fuso (`2026-09-22T19:00:00`).
@@ -44,7 +44,7 @@ private LocalDateTime canceladaEm; // + getter/setter, preenchido em converterPa
 
 ## Como rodar
 
-1. Suba o backend Spring Boot na porta 8080.
+1. Suba o backend Spring Boot na porta 8081.
 2. Abra `index.html` e `admin.html` no navegador (ou sirva a pasta em qualquer servidor estático).
 3. Backend em outra URL? No console do navegador:
-   `localStorage.setItem('arena_api_base', 'http://192.168.0.10:8080')`
+   `localStorage.setItem('arena_api_base', 'http://192.168.0.10:8081')`
